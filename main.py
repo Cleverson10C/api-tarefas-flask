@@ -44,6 +44,8 @@ def listar_tarefas():
         ]
     finally:
         conexao.close()
+        if not tarefas:
+            return jsonify({"mensagem": "Nenhuma tarefa encontrada."}), 404
         return jsonify(tarefas)
         
 @app.route("/tarefas", methods=["POST"])
@@ -55,7 +57,8 @@ def criar_tarefa():
         cursor.execute("INSERT INTO tarefas (titulo, tempo_gasto, dia_semana, concluida) VALUES (?, ?, ?, ?)",
                        (dados["titulo"], dados["tempo_gasto"], dados["dia_semana"], dados["concluida"]))
         conexao.commit()
-        return jsonify({"mensagem": "Tarefa criada com sucesso!"}), 201
+        tarefa_id = cursor.lastrowid
+        return jsonify({"mensagem": "Tarefa criada com sucesso!", "id": tarefa_id}), 201
     finally:
         conexao.close()
         
@@ -76,7 +79,7 @@ def atualizar_tarefa(id):
     finally:
         conexao.close()
 
-@app.route("/tarefas", methods=["PUT"])
+# @app.route("/tarefas", methods=["PUT"])
 @app.route("/tarefas/", methods=["PUT"])
 def atualizar_tarefa_sem_id():
     return jsonify({"mensagem": "Informe o ID na URL para atualizar. Exemplo: /tarefas/1"}), 400
@@ -92,7 +95,7 @@ def deletar_tarefa(id):
     finally:
         conexao.close()
 
-@app.route("/tarefas", methods=["DELETE"])
+# @app.route("/tarefas", methods=["DELETE"])
 @app.route("/tarefas/", methods=["DELETE"])
 def deletar_tarefa_sem_id():
     return jsonify({"mensagem": "Informe o ID na URL para deletar. Exemplo: /tarefas/1"}), 400

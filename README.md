@@ -1,16 +1,19 @@
-# API de Tarefas
+# API de Tarefas com Interface Gráfica
 
-API REST simples para gerenciamento de tarefas usando **Flask** e **SQLite**.
+API REST completa para gerenciamento de tarefas usando **Flask**, **SQLite** e interface gráfica com **CustomTkinter**.
 
 ## Tecnologias
-- Python 3
-- Flask
-- SQLite (`sqlite3`, nativo do Python)
+- **Backend**: Python 3, Flask, SQLite
+- **Frontend**: CustomTkinter (interface gráfica moderna)
+- **Comunicação**: Requests para integração API-GUI
 
 ## Estrutura do Projeto
-- `main.py`: inicializa a aplicação Flask e define as rotas CRUD.
-- `banco.py`: cria conexão com banco e garante a criação da tabela `tarefas`.
-- `tarefas.db`: banco SQLite gerado localmente.
+- `main.py`: API Flask com endpoints REST
+- `banco.py`: Conexão e criação do banco SQLite
+- `gui_tarefas.py`: Interface gráfica para gerenciamento de tarefas
+- `test_api.py`: Script de teste automatizado da API
+- `tarefas.db`: Banco SQLite gerado localmente
+- `requirements.txt`: Dependências do projeto
 
 ## Modelo de Dados
 Tabela `tarefas`:
@@ -18,86 +21,179 @@ Tabela `tarefas`:
 - `titulo` (TEXT, obrigatório)
 - `tempo_gasto` (INTEGER, padrão `0`)
 - `dia_semana` (TEXT, obrigatório)
-- `concluida` (INTEGER, padrão `0`)  
-
-> Observação: o campo `concluida` está como inteiro (`0` ou `1`).
+- `concluida` (INTEGER, padrão `0` - 0=não, 1=sim)
 
 ## Como Executar
-1. Crie e ative um ambiente virtual (opcional, recomendado).
-2. Instale as dependências:
 
+### 1. Preparação
 ```bash
+# Criar ambiente virtual (recomendado)
+python -m venv venv
+
+# Ativar ambiente virtual
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Instalar dependências
 pip install -r requirements.txt
 ```
 
-3. Execute a API:
-
+### 2. Executar API
 ```bash
 python main.py
 ```
+A API inicia em `http://127.0.0.1:5000` (modo debug ativado).
 
-A aplicação inicia em `http://127.0.0.1:5000` (modo `debug=True`).
+### 3. Executar Interface Gráfica (em outro terminal)
+```bash
+# Manter a API rodando no terminal anterior
+python gui_tarefas.py
+```
 
-## Endpoints
+## Funcionalidades
 
-### 1. Página inicial
+### API REST Endpoints
+
+#### 1. Página Inicial
 - **GET** `/`
+- Retorna informações sobre a API e exemplo de uso
 
-Resposta (exemplo):
-
-```json
-{
-  "mensagem": "Bem-vindo à API de Tarefas!",
-  "como_criar_tarefa": {
-    "metodo": "POST",
-    "endpoint": "/tarefas",
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "body_exemplo": {
-      "titulo": "Estudar Flask",
-      "tempo_gasto": 60,
-      "dia_semana": "segunda",
-      "concluida": 0
-    }
-  }
-}
-```
-
-### 2. Listar tarefas
+#### 2. Listar Tarefas
 - **GET** `/tarefas`
+- Retorna lista de todas as tarefas ou mensagem "Nenhuma tarefa encontrada" (404)
 
-Resposta (exemplo):
-
-```json
-[
-  {
-    "id": 1,
-    "titulo": "Estudar Flask",
-    "tempo_gasto": 60,
-    "dia_semana": "segunda",
-    "concluida": 0
-  }
-]
-```
-
-### 3. Criar tarefa
+#### 3. Criar Tarefa
 - **POST** `/tarefas`
+- Body JSON obrigatório com: titulo, tempo_gasto, dia_semana, concluida
+- Retorna confirmação com ID da tarefa criada
 
-Body JSON:
+#### 4. Atualizar Tarefa
+- **PUT** `/tarefas/<id>`
+- Body JSON com campos a atualizar
+- Requer ID na URL
 
-```json
-{
-  "titulo": "Estudar Flask",
-  "tempo_gasto": 60,
-  "dia_semana": "segunda",
-  "concluida": 0
-}
+#### 5. Deletar Tarefa
+- **DELETE** `/tarefas/<id>`
+- Remove tarefa pelo ID
+
+### Interface Gráfica (GUI)
+
+A GUI oferece interface intuitiva para todas as operações:
+
+#### Campos da Interface:
+- **ID da tarefa**: Para operações de atualização/deleção
+- **Título da tarefa**: Campo obrigatório
+- **Tempo gasto (minutos)**: Campo obrigatório, deve ser número
+- **Dia da semana**: Campo obrigatório
+- **Concluída**: Checkbox para marcar tarefa como concluída
+
+#### Botões Disponíveis:
+- **Adicionar Tarefa**: Cria nova tarefa
+- **Listar Tarefas**: Mostra todas as tarefas no banco
+- **Atualizar Tarefa**: Modifica tarefa existente (requer ID)
+- **Deletar Tarefa**: Remove tarefa (requer ID)
+
+#### Área de Resultados:
+- Exibe mensagens de sucesso/erro
+- Mostra lista de tarefas quando solicitada
+- Tratamento inteligente de respostas da API
+
+## Exemplos de Uso
+
+### Via API (cURL)
+
+Criar tarefa:
+```bash
+curl -X POST http://127.0.0.1:5000/tarefas \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Estudar Python","tempo_gasto":120,"dia_semana":"segunda","concluida":0}'
 ```
 
-Resposta:
+Listar tarefas:
+```bash
+curl http://127.0.0.1:5000/tarefas
+```
 
-```json
+Atualizar tarefa (ID 1):
+```bash
+curl -X PUT http://127.0.0.1:5000/tarefas/1 \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Estudar Python Avançado","tempo_gasto":180,"concluida":1}'
+```
+
+Deletar tarefa (ID 1):
+```bash
+curl -X DELETE http://127.0.0.1:5000/tarefas/1
+```
+
+### Via Interface Gráfica
+
+1. **Adicionar tarefa**:
+   - Preencher título, tempo, dia da semana
+   - Marcar "Concluída" se necessário
+   - Clicar "Adicionar Tarefa"
+
+2. **Listar tarefas**:
+   - Clicar "Listar Tarefas"
+   - Ver lista na área de resultados
+
+3. **Atualizar tarefa**:
+   - Inserir ID da tarefa
+   - Preencher novos dados
+   - Clicar "Atualizar Tarefa"
+
+4. **Deletar tarefa**:
+   - Inserir ID da tarefa
+   - Clicar "Deletar Tarefa"
+
+## Testes Automatizados
+
+Execute testes da API:
+```bash
+python test_api.py
+```
+
+O script testa automaticamente:
+- Criação de tarefa
+- Listagem de tarefas
+- Atualização de tarefa
+- Deleção de tarefa
+- Verificação final
+
+## Tratamento de Erros
+
+### API:
+- Campos obrigatórios não preenchidos → 400 Bad Request
+- ID não encontrado → 404 Not Found
+- Lista vazia → 404 com mensagem personalizada
+
+### GUI:
+- Campos vazios → Alerta popup
+- Tempo não numérico → Alerta popup
+- ID inválido → Alerta popup
+- Erros da API → Mensagem clara na interface
+
+## Observações Técnicas
+
+- **Banco de dados**: SQLite com autoincrement (IDs não são reutilizados após deleção)
+- **Threading**: GUI usa threads para não bloquear interface durante requisições
+- **Validação**: Tanto API quanto GUI validam dados antes de enviar
+- **Debug**: API roda em modo debug para desenvolvimento
+
+## Melhorias Futuras
+
+- Autenticação de usuários
+- Categorias de tarefas
+- Filtros e busca avançada
+- Interface responsiva
+- Deploy em produção
+- Testes unitários completos
+
+---
+
+**Desenvolvido com ❤️ para aprendizado e demonstração de APIs REST com interface gráfica.**
 {
   "mensagem": "Tarefa criada com sucesso!"
 }
@@ -188,7 +284,49 @@ Deletar tarefa (id 1):
 curl -X DELETE http://127.0.0.1:5000/tarefas/1
 ```
 
-## Observações de Melhoria (análise do código)
-- Ainda não há validação completa dos campos obrigatórios do JSON (`titulo`, `tempo_gasto`, `dia_semana`, `concluida`), então payload incompleto pode causar `KeyError`.
-- As rotas `PUT`/`DELETE` não verificam se o `id` existe no banco antes de responder sucesso.
-- Em produção, o ideal é desativar `debug=True`.
+## Testes Automatizados
+
+Execute testes da API:
+```bash
+python test_api.py
+```
+
+O script testa automaticamente:
+- Criação de tarefa
+- Listagem de tarefas
+- Atualização de tarefa
+- Deleção de tarefa
+- Verificação final
+
+## Tratamento de Erros
+
+### API:
+- Campos obrigatórios não preenchidos → 400 Bad Request
+- ID não encontrado → 404 Not Found
+- Lista vazia → 404 com mensagem personalizada
+
+### GUI:
+- Campos vazios → Alerta popup
+- Tempo não numérico → Alerta popup
+- ID inválido → Alerta popup
+- Erros da API → Mensagem clara na interface
+
+## Observações Técnicas
+
+- **Banco de dados**: SQLite com autoincrement (IDs não são reutilizados após deleção)
+- **Threading**: GUI usa threads para não bloquear interface durante requisições
+- **Validação**: Tanto API quanto GUI validam dados antes de enviar
+- **Debug**: API roda em modo debug para desenvolvimento
+
+## Melhorias Futuras
+
+- Autenticação de usuários
+- Categorias de tarefas
+- Filtros e busca avançada
+- Interface responsiva
+- Deploy em produção
+- Testes unitários completos
+
+---
+
+**Desenvolvido com ❤️ para aprendizado e demonstração de APIs REST com interface gráfica.**

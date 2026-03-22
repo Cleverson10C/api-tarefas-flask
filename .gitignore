@@ -1,0 +1,51 @@
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Banco de dados SQLite
+*.db
+*.sqlite
+*.sqlite3
+tarefas.db
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de distribuição
+dist/
+build/
+*.egg-info/
+
+# Testes
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Ambiente de desenvolvimento
+.env
+.env.local
+.env.production
