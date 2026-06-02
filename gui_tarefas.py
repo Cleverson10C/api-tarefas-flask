@@ -10,18 +10,34 @@ class TarefasApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Gerenciador de Tarefas")
-        self.geometry("600x600")
+        self.geometry("600x660")
         self.criar_interface()
 
     def criar_interface(self):
         self.frame_principal = ctk.CTkFrame(self)
         self.frame_principal.pack(fill="both", expand=True)
+        # permitir que as duas colunas se expandam igualmente (para centralizar labels)
+        self.frame_principal.grid_columnconfigure(0, weight=1)
+        self.frame_principal.grid_columnconfigure(1, weight=1)
 
-        self.label_titulo = ctk.CTkLabel(self.frame_principal, text="Gerenciador de Tarefas", font=("Arial", 20))
-        self.entrada_id = ctk.CTkEntry(self.frame_principal, placeholder_text="ID da tarefa (para atualizar/deletar)")
-        self.entrada_titulo = ctk.CTkEntry(self.frame_principal, placeholder_text="Digite o título da tarefa")
-        self.entrada_tempo = ctk.CTkEntry(self.frame_principal, placeholder_text="Tempo gasto (minutos)")
-        self.entrada_dia = ctk.CTkEntry(self.frame_principal, placeholder_text="Dia da semana")
+        self.label_titulo = ctk.CTkLabel(self.frame_principal, text="Gerenciador de Tarefas", font=("Arial", 30, "bold"))
+
+        # ID
+        self.label_id = ctk.CTkLabel(self.frame_principal, text="ID da tarefa (apenas para atualizar/deletar):", font=("Arial", 12))
+        self.entrada_id = ctk.CTkEntry(self.frame_principal, placeholder_text="ID", width=500)
+
+        # Título
+        self.label_titulo_campo = ctk.CTkLabel(self.frame_principal, text="Título da tarefa:", font=("Arial", 12))
+        self.entrada_titulo = ctk.CTkEntry(self.frame_principal, placeholder_text="Título", width=500)
+
+        # Tempo
+        self.label_tempo = ctk.CTkLabel(self.frame_principal, text="Tempo gasto (min):", font=("Arial", 12), anchor="center")
+        self.entrada_tempo = ctk.CTkEntry(self.frame_principal, placeholder_text="Minutos", width=200)
+
+        # Dia
+        self.label_dia = ctk.CTkLabel(self.frame_principal, text="Dia da semana:", font=("Arial", 12), anchor="center")
+        self.entrada_dia = ctk.CTkEntry(self.frame_principal, placeholder_text="Ex: Seg, Ter", width=200)
+
         self.checkbox_concluida = ctk.CTkCheckBox(self.frame_principal, text="Concluída")
 
         self.botao_adicionar = ctk.CTkButton(self.frame_principal, text="Adicionar Tarefa", command=self.adicionar_tarefa)
@@ -32,16 +48,26 @@ class TarefasApp(ctk.CTk):
         self.texto_resultados = ctk.CTkTextbox(self.frame_principal, width=600, height=250, font=("Arial", 16))
 
         self.label_titulo.grid(row=0, column=0, columnspan=2, pady=10)
-        self.entrada_id.grid(row=1, column=0, columnspan=2, pady=5)
-        self.entrada_titulo.grid(row=2, column=0, columnspan=2, pady=5)
-        self.entrada_tempo.grid(row=3, column=0, columnspan=2, pady=5)
-        self.entrada_dia.grid(row=4, column=0, columnspan=2, pady=5)
-        self.checkbox_concluida.grid(row=5, column=0, columnspan=2, pady=5)
-        self.botao_adicionar.grid(row=6, column=0, pady=10)
-        self.botao_listar.grid(row=6, column=1, pady=10)
-        self.botao_atualizar.grid(row=7, column=0, pady=10)
-        self.botao_deletar.grid(row=7, column=1, pady=10)
-        self.texto_resultados.grid(row=8, column=0, columnspan=2, pady=10)
+
+        self.label_id.grid(row=1, column=0, columnspan=2, pady=(5, 0))
+        self.entrada_id.grid(row=2, column=0, columnspan=2, pady=(0, 8))
+
+        self.label_titulo_campo.grid(row=3, column=0, columnspan=2, pady=(5, 0))
+        self.entrada_titulo.grid(row=4, column=0, columnspan=2, pady=(0, 8))
+
+        self.label_tempo.grid(row=5, column=0, pady=(5, 0), sticky="ew")
+        self.entrada_tempo.grid(row=6, column=0, pady=(0, 8), padx=(0, 10))
+        self.label_dia.grid(row=5, column=1, pady=(5, 0), sticky="ew")
+        self.entrada_dia.grid(row=6, column=1, pady=(0, 8))
+
+        self.checkbox_concluida.grid(row=7, column=0, columnspan=2, pady=5)
+
+        self.botao_adicionar.grid(row=8, column=0, pady=10, padx=10, sticky="ew")
+        self.botao_listar.grid(row=8, column=1, pady=10, padx=10, sticky="ew")
+        self.botao_atualizar.grid(row=9, column=0, pady=10, padx=10, sticky="ew")
+        self.botao_deletar.grid(row=9, column=1, pady=10, padx=10, sticky="ew")
+
+        self.texto_resultados.grid(row=10, column=0, columnspan=2, pady=10)
 
     def preparar_dados(self):
         titulo = self.entrada_titulo.get()
@@ -116,7 +142,7 @@ class TarefasApp(ctk.CTk):
                 resposta = requests.delete(url)
             self.after(0, lambda: self._atualizar_resultados(resposta))
         except requests.RequestException as erro:
-            self.after(0, lambda: self._atualizar_resultados(None, str(erro)))
+            self.after(0, lambda e=erro: self._atualizar_resultados(None, str(e)))
 
     def _atualizar_resultados(self, resposta, erro=None):
         self.texto_resultados.delete("0.0", "end")
@@ -141,7 +167,7 @@ class TarefasApp(ctk.CTk):
         if resposta.status_code in [200, 201]:
             if isinstance(dados, list):
                 for item in dados:
-                    self.texto_resultados.insert("end", f"ID: {item.get('id')}, Título: {item.get('titulo')}, Tempo: {item.get('tempo_gasto')}, Dia: {item.get('dia_semana')}, Concluída: {item.get('concluida')}\n")
+                    self.texto_resultados.insert("end", f"ID: {item.get('id')} - Título: {item.get('titulo')}, Tempo: {item.get('tempo_gasto')}, Dia: {item.get('dia_semana')}, Concluída: {item.get('concluida')}\n")
             elif mensagem:
                 self.texto_resultados.insert("0.0", f"Sucesso: {mensagem}")
             elif dados is not None:
