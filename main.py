@@ -83,7 +83,8 @@ def atualizar_tarefa(id):
 @app.route("/tarefas/", methods=["PUT"])
 def atualizar_tarefa_sem_id():
     return jsonify({"mensagem": "Informe o ID na URL para atualizar. Exemplo: /tarefas/1"}), 400
-        
+
+# @app.route("/tarefas", methods=["DELETE"])    
 @app.route("/tarefas/<int:id>", methods=["DELETE"])
 def deletar_tarefa(id):
     conexao = inicializar_banco()
