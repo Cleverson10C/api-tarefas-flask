@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request
 from banco import criar_tabela, inicializar_banco
 
+# Criando a aplicação Flask e inicializando o banco de dados
 app = Flask(__name__)
 app.json.sort_keys = False
 criar_tabela()
 
+# Rotas home da API
 @app.route("/")
 def home():
     return jsonify({
@@ -24,6 +26,7 @@ def home():
         }
     })
 
+# @app.route("/tarefas/<int:id>", methods=["GET"])
 @app.route("/tarefas", methods=["GET"])
 def listar_tarefas():
     conexao = inicializar_banco()
@@ -47,7 +50,8 @@ def listar_tarefas():
         if not tarefas:
             return jsonify({"mensagem": "Nenhuma tarefa encontrada."}), 404
         return jsonify(tarefas)
-        
+
+# @app.route("/tarefas/<int:id>", methods=["POST"])       
 @app.route("/tarefas", methods=["POST"])
 def criar_tarefa():
     conexao = inicializar_banco()
@@ -61,7 +65,8 @@ def criar_tarefa():
         return jsonify({"mensagem": "Tarefa criada com sucesso!", "id": tarefa_id}), 201
     finally:
         conexao.close()
-        
+
+# @app.route("/tarefas/<int:id>", methods=["PUT"])       
 @app.route("/tarefas/<int:id>", methods=["PUT"])
 def atualizar_tarefa(id):
     conexao = inicializar_banco()
@@ -80,10 +85,10 @@ def atualizar_tarefa(id):
         conexao.close()
 
 # @app.route("/tarefas", methods=["PUT"])
-@app.route("/tarefas/", methods=["PUT"])
 def atualizar_tarefa_sem_id():
     return jsonify({"mensagem": "Informe o ID na URL para atualizar. Exemplo: /tarefas/1"}), 400
-        
+
+# @app.route("/tarefas", methods=["DELETE"])    
 @app.route("/tarefas/<int:id>", methods=["DELETE"])
 def deletar_tarefa(id):
     conexao = inicializar_banco()
